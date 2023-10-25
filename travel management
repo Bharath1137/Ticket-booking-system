@@ -1,0 +1,65 @@
+import tkinter as tk
+import sqlite3
+
+class TicketBookingSystem:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Ticket Booking System")
+        self.master.geometry("400x300")
+        
+        self.ticket_type_label = tk.Label(self.master, text="Ticket Type:")
+        self.ticket_type_label.pack()
+        
+        self.ticket_type = tk.StringVar()
+        self.ticket_type.set("Select Ticket Type")
+        
+        self.ticket_type_dropdown = tk.OptionMenu(self.master, self.ticket_type, "Standard", "Premium")
+        self.ticket_type_dropdown.pack()
+        
+        self.name_label = tk.Label(self.master, text="Name:")
+        self.name_label.pack()
+        
+        self.name_entry = tk.Entry(self.master)
+        self.name_entry.pack()
+        
+        self.email_label = tk.Label(self.master, text="Email:")
+        self.email_label.pack()
+        
+        self.email_entry = tk.Entry(self.master)
+        self.email_entry.pack()
+        
+        self.submit_button = tk.Button(self.master, text="Submit", command=self.submit_booking)
+        self.submit_button.pack()
+        
+    def submit_booking(self):
+        ticket_type = self.ticket_type.get()
+        name = self.name_entry.get()
+        email = self.email_entry.get()
+        
+        if ticket_type == "Select Ticket Type" or not name or not email:
+            error_message = tk.Toplevel(self.master)
+            error_message.title("Error")
+            error_message.geometry("200x50")
+            
+            error_label = tk.Label(error_message, text="Please fill all the fields!")
+            error_label.pack()
+        else:
+            conn = sqlite3.connect("ticket_booking.db")
+            c = conn.cursor()
+            
+            c.execute("CREATE TABLE IF NOT EXISTS bookings (id INTEGER PRIMARY KEY, ticket_type TEXT, name TEXT, email TEXT)")
+            c.execute("INSERT INTO bookings (ticket_type, name, email) VALUES (?, ?, ?)", (ticket_type, name, email))
+            
+            conn.commit()
+            conn.close()
+            
+            success_message = tk.Toplevel(self.master)
+            success_message.title("Success")
+            success_message.geometry("200x50")
+            
+            success_label = tk.Label(success_message, text="Booking successful!")
+            success_label.pack()
+
+root = tk.Tk()
+TicketBookingSystem(root)
+root.mainloop()
